@@ -1,0 +1,25 @@
+---
+title: "Health vs. Income"
+author: "Yiyun Gong"
+output: html_notebook
+---
+
+```{r}
+# always clean up R environment
+rm(list = ls())
+
+# load all packages here
+
+# load dataset
+health_allPop<-
+  read.csv("Health_allPop.csv", header = T)
+health_percapita<-
+  read.csv("Health_percapita.csv", header = T)
+income<-
+  read.csv("income.csv", header = T)
+# user-defined function
+
+```
+
+
+
