@@ -20,3 +20,7 @@ income2 <- data.frame(t(df[-1]))
 colnames(income2) <- df[, 1]
 ```
 
+```{r}
+
+```
+
