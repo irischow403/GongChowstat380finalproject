@@ -17,9 +17,25 @@ health_percapita<-
   read.csv("Health_percapita.csv", header = T)
 income<-
   read.csv("income.csv", header = T)
+income_num<-
+  read.csv("income_num.csv", header = T)
 # user-defined function
 
 ```
 
+#Data Wrangling
 
+###Join Data
+
+```{r}
+
+```
+
+
+
+#Data Visualization
+
+
+
+#Data Analysis
 

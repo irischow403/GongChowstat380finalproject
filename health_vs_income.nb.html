@@ -243,7 +243,7 @@ $(document).ready(function () {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBhbHdheXMgY2xlYW4gdXAgUiBlbnZpcm9ubWVudFxucm0obGlzdCA9IGxzKCkpXG4jIGxvYWQgYWxsIHBhY2thZ2VzIGhlcmVcbiMgbG9hZCBkYXRhc2V0XG5oZWFsdGhfYWxsUG9wPC1cbiAgcmVhZC5jc3YoXCJIZWFsdGhfYWxsUG9wLmNzdlwiLCBoZWFkZXIgPSBUKVxuaGVhbHRoX3BlcmNhcGl0YTwtXG4gIHJlYWQuY3N2KFwiSGVhbHRoX3BlcmNhcGl0YS5jc3ZcIiwgaGVhZGVyID0gVClcbmluY29tZTwtXG4gIHJlYWQuY3N2KFwiaW5jb21lLmNzdlwiLCBoZWFkZXIgPSBUKVxuIyB1c2VyLWRlZmluZWQgZnVuY3Rpb25cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBhbHdheXMgY2xlYW4gdXAgUiBlbnZpcm9ubWVudFxucm0obGlzdCA9IGxzKCkpXG4jIGxvYWQgYWxsIHBhY2thZ2VzIGhlcmVcbiMgbG9hZCBkYXRhc2V0XG5oZWFsdGhfYWxsUG9wPC1cbiAgcmVhZC5jc3YoXCJIZWFsdGhfYWxsUG9wLmNzdlwiLCBoZWFkZXIgPSBUKVxuaGVhbHRoX3BlcmNhcGl0YTwtXG4gIHJlYWQuY3N2KFwiSGVhbHRoX3BlcmNhcGl0YS5jc3ZcIiwgaGVhZGVyID0gVClcbmluY29tZTwtXG4gIHJlYWQuY3N2KFwiaW5jb21lLmNzdlwiLCBoZWFkZXIgPSBUKVxuaW5jb21lX251bTwtXG4gIHJlYWQuY3N2KFwiaW5jb21lX251bS5jc3ZcIiwgaGVhZGVyID0gVClcbiMgdXNlci1kZWZpbmVkIGZ1bmN0aW9uXG5gYGAifQ== -->
 <pre class="r"><code># always clean up R environment
 rm(list = ls())
 # load all packages here
@@ -254,13 +254,31 @@ health_percapita&lt;-
   read.csv(&quot;Health_percapita.csv&quot;, header = T)
 income&lt;-
   read.csv(&quot;income.csv&quot;, header = T)
+income_num&lt;-
+  read.csv(&quot;income_num.csv&quot;, header = T)
 # user-defined function</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<div id="data-wrangling" class="section level1">
+<h1>Data Wrangling</h1>
+<div id="join-data" class="section level3">
+<h3>Join Data</h3>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+<div id="data-visualization" class="section level1">
+<h1>Data Visualization</h1>
+</div>
+<div id="data-analysis" class="section level1">
+<h1>Data Analysis</h1>
+<!-- rnb-text-end -->
+</div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiSGVhbHRoIHZzLiBJbmNvbWUiCmF1dGhvcjogIllpeXVuIEdvbmciCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCmBgYHtyfQojIGFsd2F5cyBjbGVhbiB1cCBSIGVudmlyb25tZW50CnJtKGxpc3QgPSBscygpKQoKIyBsb2FkIGFsbCBwYWNrYWdlcyBoZXJlCgojIGxvYWQgZGF0YXNldApoZWFsdGhfYWxsUG9wPC0KICByZWFkLmNzdigiSGVhbHRoX2FsbFBvcC5jc3YiLCBoZWFkZXIgPSBUKQpoZWFsdGhfcGVyY2FwaXRhPC0KICByZWFkLmNzdigiSGVhbHRoX3BlcmNhcGl0YS5jc3YiLCBoZWFkZXIgPSBUKQppbmNvbWU8LQogIHJlYWQuY3N2KCJpbmNvbWUuY3N2IiwgaGVhZGVyID0gVCkKIyB1c2VyLWRlZmluZWQgZnVuY3Rpb24KCmBgYAoKCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiSGVhbHRoIHZzLiBJbmNvbWUiCmF1dGhvcjogIllpeXVuIEdvbmciCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCmBgYHtyfQojIGFsd2F5cyBjbGVhbiB1cCBSIGVudmlyb25tZW50CnJtKGxpc3QgPSBscygpKQoKIyBsb2FkIGFsbCBwYWNrYWdlcyBoZXJlCgojIGxvYWQgZGF0YXNldApoZWFsdGhfYWxsUG9wPC0KICByZWFkLmNzdigiSGVhbHRoX2FsbFBvcC5jc3YiLCBoZWFkZXIgPSBUKQpoZWFsdGhfcGVyY2FwaXRhPC0KICByZWFkLmNzdigiSGVhbHRoX3BlcmNhcGl0YS5jc3YiLCBoZWFkZXIgPSBUKQppbmNvbWU8LQogIHJlYWQuY3N2KCJpbmNvbWUuY3N2IiwgaGVhZGVyID0gVCkKaW5jb21lX251bTwtCiAgcmVhZC5jc3YoImluY29tZV9udW0uY3N2IiwgaGVhZGVyID0gVCkKIyB1c2VyLWRlZmluZWQgZnVuY3Rpb24KCmBgYAoKI0RhdGEgV3JhbmdsaW5nCgojIyNKb2luIERhdGEKCmBgYHtyfQoKYGBgCgoKCiNEYXRhIFZpc3VhbGl6YXRpb24KCgoKI0RhdGEgQW5hbHlzaXMKCg==</div>
 
 
 
