@@ -26,7 +26,7 @@ remove_comma<-
       ncol(table_name)
     for (i in 2:ncol){
       table_name[,i]<-
-        gsub(",","",income_num[,i])
+        gsub(",","",table_name[,i])
       table_name[,i]<-
         as.numeric(table_name[,i])
     }
@@ -60,6 +60,19 @@ income_num_sub<-
 ```{r}
 health_percapita_sub<-
   health_percapita[,1:2]
+health_percapita_sub<-
+  remove_comma(health_percapita_sub)
+```
+
+```{r}
+income_num_sub_3fifth<-
+  data.frame(income_num_sub[,c(1,4)])
+```
+
+#join 60%income with average insurane price per capita
+```{r}
+insurance_income<-
+  merge(x=income_num_sub_3fifth, y=health_percapita_sub, by = "Year", all=TRUE)
 ```
 
 #Data Visualization
