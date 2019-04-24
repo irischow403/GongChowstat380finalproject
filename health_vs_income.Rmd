@@ -9,7 +9,7 @@ output: html_notebook
 rm(list = ls())
 
 # load all packages here
-
+library(dplyr)
 # load dataset
 health_allPop<-
   read.csv("Health_allPop.csv", header = T)
@@ -20,18 +20,47 @@ income<-
 income_num<-
   read.csv("income_num.csv", header = T)
 # user-defined function
-
+remove_comma<-
+  function(table_name){
+    ncol<-
+      ncol(table_name)
+    for (i in 2:ncol){
+      table_name[,i]<-
+        gsub(",","",income_num[,i])
+      table_name[,i]<-
+        as.numeric(table_name[,i])
+    }
+    return(table_name)
+}
 ```
 
 #Data Wrangling
 
-###Join Data
-
+###Data Clearing income_num dataset
 ```{r}
-
+income_num$Year<-
+  substr(income_num$Year, 1, 4)
 ```
 
+```{r}
+income_num<-
+  remove_comma(income_num)
+```
 
+#subsetting and merging datasets income_num and health_percapita
+```{r}
+income_num$Year<-
+  as.numeric(income_num$Year)
+income_num_sub<-
+  income_num %>%
+  filter(Year>1999&Year<2016)%>%
+  arrange(Year)
+```
+
+```{r}
+health_percapita_sub<-
+  health_percapita[,1:2]
+```
 
 #Data Visualization
 

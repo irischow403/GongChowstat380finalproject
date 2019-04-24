@@ -9,7 +9,6 @@ output: html_notebook
 
 *This document is required to indicate where various requirements can be found within your Final Project Report Rmd.  You must* **indicate line numbers as they appear in your final Rmd document** *accompanying each of the following required tasks. Points will be deducted if line numbers are missing or differ signficantly from the submitted Final Rmd document.*  
 
-
 # Final Project Requirements
 
 ### Joins (at least) two different data sources for analysis
