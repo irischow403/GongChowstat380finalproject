@@ -1,0 +1,85 @@
+---
+title: "Health vs. Income"
+author: "Yiyun Gong"
+output: html_notebook
+---
+
+```{r}
+# always clean up R environment
+rm(list = ls())
+
+# load all packages here
+library(ggplot2)
+library(mdsr)
+library(tidyverse)
+library(lubridate)
+library(mosaic)
+library(NHANES)
+library(macleish)
+library(babynames)
+library(Hmisc)
+
+# load dataset
+health_allPop<-
+  read.csv("Health_allPop.csv", header = T)
+health_percapita<-
+  read.csv("Health_percapita.csv", header = T)
+income<-
+  read.csv("income.csv", header = T)
+income_num<-
+  read.csv("income_num.csv", header = T)
+data("MedicareCharges")
+# user-defined function
+
+```
+
+
+
+
+=======
+#Data Wrangling
+>>>>>>> 65d49c1a681cb1b6746e1f6243921370c7a4f07e
+
+###Join Data
+
+```{r}
+
+```
+
+
+
+#Data Visualization
+
+```{r}
+g <- ggplot(data = health_allPop, aes(y = Health, x = Year))
+g + geom_point(size = 3)
+```
+
+```{r}
+ChargesNJ <- MedicareCharges %>%
+  filter(stateProvider == "NJ")
+p <- ggplot(data = ChargesNJ,
+            aes(x = reorder(drg, mean_charge), y = mean_charge)) +
+  geom_bar(fill = "grey", stat = "identity") +
+  ylab("Statewide Average Charges ($)") + xlab("Medical Procedure (DRG)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p
+```
+
+```{r}
+p + geom_point(data = MedicareCharges, size = 1, alpha = 0.3)
+```
+
+```{r}
+ggplot(data = income, aes(x = Estimate, fill=Subject))+geom_density()
+```
+
+```{r}
+ggplot(data = head(health_percapita, 10), aes(x = reorder(state, math), y = math)) + 
+  geom_bar(stat = "identity")
+```
+
+
+
+#Data Analysis
+
