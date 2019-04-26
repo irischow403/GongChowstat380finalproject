@@ -10,6 +10,9 @@ rm(list = ls())
 
 # load all packages here
 library(dplyr)
+library(reshape2)
+library(tidyr)
+library(ggplot2)
 # load dataset
 health_allPop<-
   read.csv("Health_allPop.csv", header = T)
@@ -58,26 +61,65 @@ income_num_sub<-
 ```
 
 ```{r}
-health_percapita_sub<-
-  health_percapita[,1:2]
-health_percapita_sub<-
-  remove_comma(health_percapita_sub)
+health_percapita<-
+  remove_comma(health_percapita)
+health_allPop<-
+  remove_comma(health_allPop)
 ```
 
-```{r}
-income_num_sub_3fifth<-
-  data.frame(income_num_sub[,c(1,4)])
-```
-
-#join 60%income with average insurane price per capita
+#join avg income with average insurance price per capita
 ```{r}
 insurance_income<-
-  merge(x=income_num_sub_3fifth, y=health_percapita_sub, by = "Year", all=TRUE)
+  merge(x=income_num_sub, y=health_percapita, by = "Year", all=TRUE)
+```
+
+#calculate the percentage of insurance/income
+```{r}
+insurance_income<-
+  insurance_income %>%
+  mutate(ins_percentage = Health/Third.fifth)
+```
+
+#spread and gather income
+```{r}
+income_status<-
+  income %>%
+  spread(key = Subject, value = Estimate)
+```
+
+######need to work on this later
+```{r}
+health_allPop_gather<-
+  health_allPop[,c('Year', 'Health', 'Health.services', 'Medical.products..appliances.and.equipment')]
+```
+
+```{r}
+health_allPop_gather_test<-
+  health_allPop_gather %>%
+  gather(key = Health.services, value = Health, -Year)
+```
+###Ahhhhhh
+
+#apply function
+```{r}
+health_percapita %>%
+  select(Health, Health.services, Medical.products..appliances.and.equipment) %>%
+  apply(MARGIN = 2, FUN = median, na.rm=TRUE)
 ```
 
 #Data Visualization
+```{r}
+g <- 
+  ggplot(data = health_allPop, aes(y = Health, x = Year))
+g + geom_point(size = 3)
+```
 
+```{r}
+ggplot(data = income, aes(x = Estimate, fill=Subject))+
+  geom_density()
+```
 
 
 #Data Analysis
 
+#Statistical modeling/Supervised learning
