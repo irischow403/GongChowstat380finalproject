@@ -44,7 +44,29 @@ remove_comma<-
   }
 
 #user-defined simulation function
-
+hein<-
+  function(a, b, c, d, e){
+    health_service<-
+      sample(a, 1)
+    health_equipment<-
+      sample(b, 1)
+    medianIncome<-
+      sample(c, 1)
+    lowIncome<-
+      sample(d, 1)
+    highIncome<-
+      sample(e, 1)
+    health_sim<-
+      health_service+health_equipment
+    percent_med<-
+      health_sim/medianIncome
+    percent_low<-
+      health_sim/lowIncome
+    percent_high<-
+      health_sim/highIncome
+      
+    return(data.frame(health_sim, health_service, health_equipment, medianIncome, percent_med, lowIncome, percent_low, highIncome, percent_high))
+  }
 ```
 
 #Data Wrangling
@@ -142,7 +164,7 @@ ggplot(data = income_num, aes(x = Year, y=Third.fifth, colour="Median Income"))+
   scale_x_continuous(breaks = income_num$Year)
 ```
 
-```{r message=FALSE}
+```{r fig.width=5, fig.asp=0.7, message=FALSE}
 #need to change the labels and titles
 ggplot(data = health_percapita, aes(x = Year, y = Health)) + 
   geom_bar(stat = "identity") +
@@ -226,7 +248,7 @@ str(set_clusts_ii)
 ```
 
 
-```{r}
+```{r fig.width=5, fig.asp=0.7}
 set.seed(2500)
 set_clusts_ii<- 
   supSet %>% 
@@ -267,32 +289,6 @@ supSet %>%
 ```
 
 #User-defined simulation(Bootstrapping)
-```{r}
-hein<-
-  function(a, b, c, d, e){
-    health_service<-
-      sample(a, 1)
-    health_equipment<-
-      sample(b, 1)
-    medianIncome<-
-      sample(c, 1)
-    lowIncome<-
-      sample(d, 1)
-    highIncome<-
-      sample(e, 1)
-    health_sim<-
-      health_service+health_equipment
-    percent_med<-
-      health_sim/medianIncome
-    percent_low<-
-      health_sim/lowIncome
-    percent_high<-
-      health_sim/highIncome
-      
-    return(data.frame(health_sim, health_service, health_equipment, medianIncome, percent_med, lowIncome, percent_low, highIncome, percent_high))
-  }
-```
-
 ```{r}
 set.seed(800)
 healthserv_set<-
