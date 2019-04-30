@@ -4,7 +4,7 @@ author: "Yiyun Gong"
 output: html_notebook
 ---
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # always clean up R environment
 rm(list = ls())
 
@@ -20,6 +20,20 @@ library(readxl)
 library(ape)
 library(mclust)
 library(lubridate)
+library(NHANES)
+library(glmnet)
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+library(nnet)
+library(e1071)
+library(class)
+library(rsample)
+library(ipred)
+library(caret)
+library(partykit)
+library(tibble)
+library(gbm)
 # load dataset
 health_allPop<-
   read.csv("Health_allPop.csv", header = T)
@@ -73,24 +87,26 @@ hein<-
 
 ###Data Clearing income_num dataset
 ```{r}
+#Clean column year
 income_num$Year<-
   substr(income_num$Year, 1, 4)
-#repeated year data
+#Delete repeated year data
 income_num<-
   income_num[-5,]
+#Change the Year column to numeric number
 income_num$Year<-
   as.numeric(income_num$Year)
 ```
 
 ```{r}
+#remove_comman function at the user-defined function section
+#Remove all the comman from the whole dataset
 income_num<-
   remove_comma(income_num)
 ```
 
-#subsetting and merging datasets income_num and health_percapita
+###Subset and merge datasets income_num and health_percapita
 ```{r}
-income_num$Year<-
-  as.numeric(income_num$Year)
 income_num_sub<-
   income_num %>%
   filter(Year>1999&Year<2016)%>%
@@ -98,26 +114,27 @@ income_num_sub<-
 ```
 
 ```{r}
+#remove commas from dataset health_percapita and health_allPop
 health_percapita<-
   remove_comma(health_percapita)
 health_allPop<-
   remove_comma(health_allPop)
 ```
 
-#join avg income with average insurance price per capita
+###Join Income table with Average insurance price per capita table
 ```{r}
 insurance_income<-
   merge(x=income_num_sub, y=health_percapita, by = "Year", all=TRUE)
 ```
 
-#calculate the percentage of insurance/income
+###Calculate the percentage of insurance/median income
 ```{r}
 insurance_income<-
   insurance_income %>%
   mutate(ins_percentage = Health/Third.fifth)
 ```
 
-#spread and gather income
+###Spread Income Percentage Table by Subject and Family Status
 ```{r}
 income_status<-
   income %>%
@@ -130,20 +147,18 @@ income_subject<-
   spread(key = Status, value = Estimate)
 ```
 
-######need to work on this later
+###Find the largest percentage on Subject by each Family Status per Year
 ```{r}
-#health_allPop_gather<-
-#  health_allPop[,c('Year', 'Health', 'Health.services', #'Medical.products..appliances.and.equipment')]
+income_status_sub<-
+  income_status[,3:12]
+income_status$max<-
+  colnames(income_status_sub)[apply(income_status_sub, 1, which.max)]
+income_status$maxPerc<-
+  apply(income_status_sub, 1, max)
+head(income_status[,c(1,2,13,14)], 5)
 ```
 
-```{r}
-#health_allPop_gather_test<-
-#  health_allPop_gather %>%
-#  gather(key = Health.services, value = Health, -Year)
-```
-###Ahhhhhh
-
-#apply function
+###Apply function to calculate the median on Health_percapita Table
 ```{r}
 health_percapita %>%
   select(Health, Health.services, Medical.products..appliances.and.equipment) %>%
@@ -161,7 +176,8 @@ ggplot(data = income_num, aes(x = Year, y=Third.fifth, colour="Median Income"))+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
   xlab("Year")+
   ylab("Income")+
-  scale_x_continuous(breaks = income_num$Year)
+  scale_x_continuous(breaks = income_num$Year)+
+  ggtitle("US Income Distribution over Years")
 ```
 
 ```{r fig.width=5, fig.asp=0.7, message=FALSE}
@@ -170,38 +186,142 @@ ggplot(data = health_percapita, aes(x = Year, y = Health)) +
   geom_bar(stat = "identity") +
   geom_point(data = income_num_sub, aes(x=Year, y=Third.fifth))+
   geom_smooth(data = income_num_sub, aes(x=Year, y=Third.fifth), show.legend = FALSE, method = "auto")+
-  ggtitle("Health expenses and median income 2000-2015") +
+  ggtitle("Health Expenditures and Median Income 2000-2015") +
   ylab("Health expenses and Income")+
   scale_x_continuous(breaks = insurance_income$Year)
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 ggplot(data = insurance_income, aes(x = Year, y = ins_percentage))+
   geom_point()+
   geom_smooth(method = "lm")+
-  ggtitle("insurance percentage per year")
+  ggtitle("Percent of Insurance Expenses over Income per year")
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 ggplot(data = insurance_income,
             aes(x = Third.fifth, y = Health.services)) +
   geom_bar(fill = "grey", stat = "identity") +
   ylab("Average Insurance Charges ($)") + xlab("Average Income") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Median Income versus Health Services Expense")
 ```
 
 
-```{r}
+```{r fig.width=5, fig.asp=0.7, message=FALSE}
 ggplot(data = income, aes(x = Estimate, fill=Subject))+
   geom_density()+
-  xlab("Percentage in Each Subject")
+  xlab("Percentage in Each Subject")+
+  ggtitle("Income Spread based on Subject and Family Status")
 ```
-
-
 
 #Data Analysis
 
 #Statistical modeling/Supervised learning
+## Data Preparation
+```{r}
+# set RNG seed for reproducible results
+set.seed(688) 
+# partition the data
+n <- 
+  nrow(income_status)
+test_idx <- 
+  sample.int(n, size = round(0.2 * n)) 
+# select row numbers for the test set
+train <- 
+  income_status[-test_idx, ]  
+# exclude the test set cases
+nrow(train)
+```
+
+```{r}
+test <- 
+  income_status[test_idx, ]    # test set cases only
+nrow(test)
+```
+
+## Inspecting training data
+```{r}
+tally(~ max, data = train)
+```
+
+```{r}
+tally(~ Status, data=train)
+favstats(train$`$100,000 to $149,999`)
+favstats(train$`$15,000 to $24,999`)
+favstats(train$`$50,000 to $74,999`)
+favstats(train$maxPerc)
+```
+
+```{r fig.width=5, fig.asp=0.7}
+pairs(train[, c(2:12)])
+```
+
+## Null Model
+```{r}
+mod_null <- 
+  tally(~ max, data = train, format = "percent")
+mod_null
+```
+
+
+#Logistic Regression
+```{r warning=FALSE, message=FALSE}
+predictors<- 
+  model.matrix(maxPerc~., data = train) 
+fit<- 
+  cv.glmnet(predictors, train$maxPerc)
+fit
+```
+
+```{r fig.width=6, fig.asp=0.5}
+plot(fit)
+```
+
+```{r}
+mean(fit$cvlo)
+mean(fit$cvup)
+```
+
+## Decision Trees
+```{r}
+rpart(max ~ `$50,000 to $74,999`, data = train)
+```
+
+```{r}
+split <- 17.85 # first split from simple `rpart`
+train %>%
+  ggplot(aes(x = `$50,000 to $74,999`, y = max)) + 
+  geom_point(aes(color = 'Year'), 
+             position = position_jitter(width = 0, height = 0.15), 
+             alpha = 0.4) + 
+  geom_vline(xintercept = split, color = "blue", lty = 2)+
+  scale_x_continuous(breaks = c(1:20))
+```
+
+```{r}
+mod_tree <- 
+  rpart(max~., data = train, control = rpart.control(cp=0.03))
+mod_tree
+```
+
+```{r fig.width=5, fig.asp=0.7}
+plot(as.party(mod_tree))
+```
+
+```{r}
+train_tree2 <- 
+  train %>%
+  mutate(sub_dtree = predict(mod_tree, type = "class"))
+confusion <- 
+  tally(sub_dtree ~ max, data = train_tree2, format = "count")
+confusion
+remove(train_tree2)
+```
+
+```{r}
+sum(diag(confusion)) / nrow(train) * 100
+```
 
 #Unsupervised learning
 
@@ -316,15 +436,16 @@ summary(percent_sim$health_equipment)
 ```
 
 ```{r fig.width=5, fig.asp=0.7}
-ggplot(data=percent_sim, aes(x=health_sim, color="Health Expend"))+
+ggplot(data=percent_sim, aes(x=health_sim, color="Health Expenditures"))+
   geom_density()+
   geom_density(data=percent_sim, aes(x=medianIncome, color="medianIncome"))+
   geom_density(data=percent_sim, aes(x=highIncome, color="highIncome"))+
   geom_density(data=percent_sim, aes(x=lowIncome, color="lowIncome"))+
-  scale_x_continuous("Expentuire on insurance and income levels")
+  scale_x_continuous("Expenditures on insurance and income levels")
 ```
 ```{r}
 #ACA affordability percentage
+#data from website:
 afford<-
   mean(c(0.0956, 0.0966, 0.0969, 0.0956, 0.0986))
 afford
@@ -337,7 +458,7 @@ ggplot(data=percent_sim, aes(x=percent_med, color="median income"))+
   geom_density(data=percent_sim, aes(x=percent_low, color="Lowest fifth"))+
   geom_density(data=percent_sim, aes(x=percent_high, color="Highest fifth"))+
   geom_vline(xintercept = afford, linetype = 2, color="Brown")+
-  scale_x_continuous("percent of health expentuire on income", breaks = (0:10)/10)
+  scale_x_continuous("percent of health expenditures on income", breaks = (0:10)/10)
 ```
 
 
