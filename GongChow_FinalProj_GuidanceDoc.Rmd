@@ -1,6 +1,6 @@
 ---
 title: 'Final Project: Guidance Document'
-author: "Author-1-Name & Author-2-Name"
+author: "Yiyun Gong & Tsz Yau Iris Chow"
 date: "Due April 30, 2019"
 output:
   html_document:
