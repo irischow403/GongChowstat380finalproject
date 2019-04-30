@@ -13,6 +13,13 @@ library(dplyr)
 library(reshape2)
 library(tidyr)
 library(ggplot2)
+library(mosaic)
+library(mdsr) 
+library(Lahman)
+library(readxl)
+library(ape)
+library(mclust)
+library(lubridate)
 # load dataset
 health_allPop<-
   read.csv("Health_allPop.csv", header = T)
@@ -34,7 +41,10 @@ remove_comma<-
         as.numeric(table_name[,i])
     }
     return(table_name)
-}
+  }
+
+#user-defined simulation function
+
 ```
 
 #Data Wrangling
@@ -43,6 +53,11 @@ remove_comma<-
 ```{r}
 income_num$Year<-
   substr(income_num$Year, 1, 4)
+#repeated year data
+income_num<-
+  income_num[-5,]
+income_num$Year<-
+  as.numeric(income_num$Year)
 ```
 
 ```{r}
@@ -87,16 +102,22 @@ income_status<-
   spread(key = Subject, value = Estimate)
 ```
 
+```{r}
+income_subject<-
+  income %>%
+  spread(key = Status, value = Estimate)
+```
+
 ######need to work on this later
 ```{r}
-health_allPop_gather<-
-  health_allPop[,c('Year', 'Health', 'Health.services', 'Medical.products..appliances.and.equipment')]
+#health_allPop_gather<-
+#  health_allPop[,c('Year', 'Health', 'Health.services', #'Medical.products..appliances.and.equipment')]
 ```
 
 ```{r}
-health_allPop_gather_test<-
-  health_allPop_gather %>%
-  gather(key = Health.services, value = Health, -Year)
+#health_allPop_gather_test<-
+#  health_allPop_gather %>%
+#  gather(key = Health.services, value = Health, -Year)
 ```
 ###Ahhhhhh
 
@@ -108,39 +129,28 @@ health_percapita %>%
 ```
 
 #Data Visualization
-```{r}
-g <- 
-  ggplot(data = health_allPop, aes(y = Health, x = Year))
-g + geom_point(size = 3)
+```{r fig.width=5, fig.asp=0.4}
+#US Income distribution
+ggplot(data = income_num, aes(x = Year, y=Third.fifth, colour="Median Income"))+
+  geom_line()+
+  geom_line(data = income_num, aes(x=Year, y=Lowest.fifth, colour="Lowest fifth mean income"))+
+  geom_line(data = income_num, aes(x=Year, y=Highest.fifth, colour="Highest fifth mean income"))+
+  geom_line(data = income_num, aes(x=Year, y=Top.5.percent, colour="Top 5% mean income"))+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
+  xlab("Year")+
+  ylab("Income")+
+  scale_x_continuous(breaks = income_num$Year)
 ```
 
-
-
-```{r}
-g <- ggplot(data = health_allPop, aes(y = Health, x = Year))
-g + geom_point(size = 3)
-```
-
-```{r}
-#p <- ggplot(data = health_percapita,
-#            aes(x = reorder(Health.services), y = Health)) +
-#  geom_bar(fill = "grey", stat = "identity") +
-#  ylab("Average Insurance Charges ($)") + xlab("Medical Procedure") +
-#  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-#p
-```
-
-```{r}
-#p + geom_point(data = MedicareCharges, size = 1, alpha = 0.3)
-```
-
-```{r}
-ggplot(data = income, aes(x = Estimate, fill=Subject))+geom_density()
-```
-
-```{r}
-#ggplot(data = head(health_percapita, 10), aes(x = reorder(state, math), y = math)) + 
-#  geom_bar(stat = "identity")
+```{r message=FALSE}
+#need to change the labels and titles
+ggplot(data = health_percapita, aes(x = Year, y = Health)) + 
+  geom_bar(stat = "identity") +
+  geom_point(data = income_num_sub, aes(x=Year, y=Third.fifth))+
+  geom_smooth(data = income_num_sub, aes(x=Year, y=Third.fifth), show.legend = FALSE, method = "auto")+
+  ggtitle("Health expenses and median income 2000-2015") +
+  ylab("Health expenses and Income")+
+  scale_x_continuous(breaks = insurance_income$Year)
 ```
 
 ```{r}
@@ -151,12 +161,190 @@ ggplot(data = insurance_income, aes(x = Year, y = ins_percentage))+
 ```
 
 ```{r}
-ggplot(data = head(health_percapita), aes(x = Year, y = Health)) + 
-  geom_bar(stat = "identity") +
-  ggtitle("Health expenses per year") +
-  ylab("Health expenses") 
+ggplot(data = insurance_income,
+            aes(x = Third.fifth, y = Health.services)) +
+  geom_bar(fill = "grey", stat = "identity") +
+  ylab("Average Insurance Charges ($)") + xlab("Average Income") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
+
+
+```{r}
+ggplot(data = income, aes(x = Estimate, fill=Subject))+
+  geom_density()+
+  xlab("Percentage in Each Subject")
+```
+
+
 
 #Data Analysis
 
 #Statistical modeling/Supervised learning
+
+#Unsupervised learning
+
+##Hierarchical clustering
+```{r}
+unsuperSet<-
+  insurance_income
+rownames(unsuperSet)<-
+  c(2000:2015)
+```
+
+```{r}
+set_diffs<-
+  dist(unsuperSet)
+str(set_diffs)
+```
+
+```{r}
+set_mat<-
+  set_diffs %>% 
+  as.matrix() %>%
+  round(digits = 2)
+#glimpse on the matrix
+set_mat[1:6, 1:6]
+```
+
+```{r}
+set_diffs %>%
+  hclust() %>%
+  as.phylo() %>%
+  plot(cex=0.9, label.offset = 1)
+```
+A dendrogram constructed by hierarchical clustering from year-to-year distance data.
+
+##K-means
+```{r}
+supSet<-
+  insurance_income
+set.seed(2500)
+set_clusts_ii<- 
+  supSet %>% 
+  kmeans(centers = 8)
+str(set_clusts_ii)
+```
+
+
+```{r}
+set.seed(2500)
+set_clusts_ii<- 
+  supSet %>% 
+  kmeans(centers = 8) %>%
+  fitted("classes") %>% 
+  as.character()
+supSet <- 
+  supSet %>% mutate(cluster = set_clusts_ii)
+supSet %>% 
+  ggplot(aes(x = Year, y = ins_percentage)) +
+  geom_point(aes(color = cluster), alpha = 0.5)+
+  scale_x_continuous(breaks = income_num$Year)
+```
+
+```{r}
+supSet<-
+  income[,c('Year', 'Estimate')]
+set.seed(1200)
+set_clusts <- 
+  supSet %>% 
+  kmeans(centers = 8)
+str(set_clusts)
+```
+
+```{r}
+set.seed(1200)
+set_clusts <- 
+  supSet %>% 
+  kmeans(centers = 8) %>%
+  fitted("classes") %>% 
+  as.character()
+supSet <- 
+  supSet %>% mutate(cluster = set_clusts)
+supSet %>% 
+  ggplot(aes(x = Year, y = Estimate)) +
+  geom_point(aes(color = cluster), alpha = 0.5)+
+  scale_x_continuous(breaks = income$Year)
+```
+
+#User-defined simulation(Bootstrapping)
+```{r}
+hein<-
+  function(a, b, c, d, e){
+    health_service<-
+      sample(a, 1)
+    health_equipment<-
+      sample(b, 1)
+    medianIncome<-
+      sample(c, 1)
+    lowIncome<-
+      sample(d, 1)
+    highIncome<-
+      sample(e, 1)
+    health_sim<-
+      health_service+health_equipment
+    percent_med<-
+      health_sim/medianIncome
+    percent_low<-
+      health_sim/lowIncome
+    percent_high<-
+      health_sim/highIncome
+      
+    return(data.frame(health_sim, health_service, health_equipment, medianIncome, percent_med, lowIncome, percent_low, highIncome, percent_high))
+  }
+```
+
+```{r}
+set.seed(800)
+healthserv_set<-
+  insurance_income$Health.services
+equip_set<-
+  insurance_income$Medical.products..appliances.and.equipment
+income_set<-
+  insurance_income$Third.fifth
+income_top<-
+  insurance_income$Highest.fifth
+income_low<-
+  insurance_income$Lowest.fifth
+percent_sim<-
+  do(5000)*hein(healthserv_set, equip_set, income_set, income_low, income_top)
+```
+
+```{r}
+head(percent_sim)
+```
+
+```{r}
+summary(percent_sim$health_sim)
+summary(percent_sim$health_service)
+summary(percent_sim$health_equipment)
+```
+
+```{r fig.width=5, fig.asp=0.7}
+ggplot(data=percent_sim, aes(x=health_sim, color="Health Expend"))+
+  geom_density()+
+  geom_density(data=percent_sim, aes(x=medianIncome, color="medianIncome"))+
+  geom_density(data=percent_sim, aes(x=highIncome, color="highIncome"))+
+  geom_density(data=percent_sim, aes(x=lowIncome, color="lowIncome"))+
+  scale_x_continuous("Expentuire on insurance and income levels")
+```
+```{r}
+#ACA affordability percentage
+afford<-
+  mean(c(0.0956, 0.0966, 0.0969, 0.0956, 0.0986))
+afford
+```
+
+
+```{r fig.width=3, fig.asp=0.6}
+ggplot(data=percent_sim, aes(x=percent_med, color="median income"))+
+  geom_density()+
+  geom_density(data=percent_sim, aes(x=percent_low, color="Lowest fifth"))+
+  geom_density(data=percent_sim, aes(x=percent_high, color="Highest fifth"))+
+  geom_vline(xintercept = afford, linetype = 2, color="Brown")+
+  scale_x_continuous("percent of health expentuire on income", breaks = (0:10)/10)
+```
+
+
+
+
+
