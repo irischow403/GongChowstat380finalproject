@@ -185,10 +185,12 @@ ggplot(data = income_num, aes(x = Year, y=Third.fifth, colour="Median Income"))+
   scale_x_continuous(breaks = income_num$Year)+
   ggtitle("US Income Distribution over Years")
 ```
+Through the years, all income level are increasing. However, the lowest fifth mean income increases in a very slow rate while the highest fifth mean income and Top 5% mean income increase in a much faster rate. Consider the inflation, Median Income and Lowest fifth Income people might have trouble afford the health care expentiture.
+
 
 ####Health Expenditures and Median Income 2000-2015
 **Graph with layered data from secondary data frame**
-```{r fig.width=5, fig.asp=0.7, message=FALSE}
+```{r fig.width=5, fig.asp=0.6, message=FALSE}
 #need to change the labels and titles
 ggplot(data = health_percapita, aes(x = Year, y = Health)) + 
   geom_bar(stat = "identity") +
@@ -198,25 +200,17 @@ ggplot(data = health_percapita, aes(x = Year, y = Health)) +
   ylab("Health expenses and Income")+
   scale_x_continuous(breaks = insurance_income$Year)
 ```
+Both Median Income and health expenditure are increasing over the years. But after 2012, the median income might increased in a little faster rate than health expenditures.
 
 ####Percent of Insurance Expenses over Income per year
 ```{r message=FALSE, warning=FALSE}
 ggplot(data = insurance_income, aes(x = Year, y = ins_percentage))+
   geom_point()+
-  geom_smooth(method = "lm")+
+  geom_smooth(method="lm")+
   ggtitle("Percent of Insurance Expenses over Income per year")+
   scale_x_continuous(breaks = insurance_income$Year)
 ```
-
-####Median Income spread versus Health Services Expense over the Years
-```{r message=FALSE, warning=FALSE}
-ggplot(data = insurance_income,
-            aes(x = Third.fifth, y = Health.services)) +
-  geom_bar(fill = "grey", stat = "identity") +
-  ylab("Average Insurance Charges ($)") + xlab("Average Income") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
-  ggtitle("Median Income versus Health Services Expense")
-```
+The percent of health expenditure takes place over Income is increasing over the years in an approximately positive linear regression trend.
 
 ####Income Spread based on Subject and Family Status
 ```{r fig.width=5, fig.asp=0.7, message=FALSE}
@@ -225,6 +219,7 @@ ggplot(data = income, aes(x = Estimate, fill=Subject))+
   xlab("Percentage in Each Subject")+
   ggtitle("Income Spread based on Subject and Family Status")
 ```
+From the density plot, we can tell that income range from $35,000 to $49,999 has the highest density, and income range from $50,000 to $74,999 has the highest percentage among all Subjects. And the range of income($10,000 to $14,999) is spread oover the plot.
 
 #Data Analysis
 
@@ -420,6 +415,8 @@ supSet %>%
 ```
 
 #User-defined simulation(Bootstrapping)
+For the user-defined simulation. I defined a function called hein() to bootstrap data: Health.services, Medical products appliances and equipment, Third.fifth(Median Income), Highest.fifth(Income), Lowest.fifth(Income) from origin dataset, then calculate the percentage that health cost (which is the combination of the cost of Health.services+Medical productsappliances and equipment) over each level of income and organize all output into a table. Then I perform simulation 5000 times to make sure the randomness and accurancy of our simulation data.
+
 ```{r}
 set.seed(800)
 healthserv_set<-
@@ -454,14 +451,16 @@ ggplot(data=percent_sim, aes(x=health_sim, color="Health Expenditures"))+
   geom_density(data=percent_sim, aes(x=lowIncome, color="lowIncome"))+
   scale_x_continuous("Expenditures on insurance and income levels")
 ```
+From the density graph, we can see that the lowIncome is close to the range of Health expenditures which means health expenditure is nearly unafforable for low Income people. MedianIncome has a distance from health expenditures and HighIncome is far from the health expenditure. However, in our study we do not include many situation in reality like government health converage, low income people tend to choose lower amount health care and etc. Therefore, we cannot make certain conclusions on this issue here right now. 
+
 ```{r}
 #ACA affordability percentage
+#Data from https://www.integrity-data.com/a-guide-to-2019-aca-affordability-percentages-for-employers/
 #data from website:
 afford<-
   mean(c(0.0956, 0.0966, 0.0969, 0.0956, 0.0986))
 afford
 ```
-
 
 ```{r fig.width=3, fig.asp=0.6}
 ggplot(data=percent_sim, aes(x=percent_med, color="median income"))+
@@ -471,8 +470,7 @@ ggplot(data=percent_sim, aes(x=percent_med, color="median income"))+
   geom_vline(xintercept = afford, linetype = 2, color="Brown")+
   scale_x_continuous("percent of health expenditures on income", breaks = (0:10)/10)
 ```
-
-
+This graph shows the percent range on health expenditures among different level of income. According to above website, the afforable level of health expenditures should around 9.6% of total income. However, many median income and low income percent have already exceed the afforable line.
 
 
 
