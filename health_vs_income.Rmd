@@ -1,6 +1,7 @@
 ---
 title: "Health vs. Income"
-author: "Yiyun Gong"
+subtitle: "Stat380 Final Project"
+author: "Group 5 Yiyun Gong & Tsz Yau Iris Chow"
 output: html_notebook
 ---
 
@@ -85,6 +86,15 @@ hein<-
   }
 ```
 
+#Project Abstract for Social Good
+Our analysis is related to social good by showing the cost of healthcare and healthcare spending. In further discussion, we can expand our idea of the outcome of healthcare and compare U.S. healthcare system with other countries. Furthermore, health care expense takes up a significant portion of GDP and it is affecting our consumption of other goods.
+
+For supervised learning, the pairs graph shows status and income are slightly correlated to each other. We use ‘max’ as our main scope and constructed a null model to explore what range of income has the maximum percentage of overall income. In logistic regression model, we used regularization to decrease the variance and got the upper and lower bound of probability of ‘max’. Finally, the decision tree assign status variable to individual observations.
+
+For unsupervised learning, we clustered the data according to year. We also did k-mean clustering and separate data into 8 groups.
+
+Last but not least, we did a simulation by bootstraping income dataset. This shows us how much of insurance take up in the income of each class.
+
 #Data Wrangling
 
 ####Data Cleaning income_num dataset
@@ -107,7 +117,7 @@ income_num<-
   remove_comma(income_num)
 ```
 
-####Subset and merge datasets income_num and health_percapita
+####Subset datasets income_num and health_percapita
 ```{r}
 income_num_sub<-
   income_num %>%
@@ -223,8 +233,8 @@ From the density plot, we can tell that income range from $35,000 to $49,999 has
 
 #Data Analysis
 
-#Statistical modeling/Supervised learning
-## Data Preparation
+##Statistical modeling/Supervised learning
+#### Data Preparation
 ```{r}
 # set RNG seed for reproducible results
 set.seed(688) 
@@ -246,7 +256,7 @@ test <-
 nrow(test)
 ```
 
-## Inspecting training data
+#### Inspecting training data
 ```{r}
 tally(~ max, data = train)
 ```
@@ -262,16 +272,17 @@ favstats(train$maxPerc)
 ```{r fig.width=5, fig.asp=0.7}
 pairs(train[, c(2:12)])
 ```
+The pairs graph shows status and income are slightly correlated to each other.
 
-## Null Model
+### Null Model
 ```{r}
 mod_null <- 
   tally(~ max, data = train, format = "percent")
 mod_null
 ```
+The baseline of our analysis is the percentage of people in a certain range of income. There are 4.5% of people earning $100,000 to $149,999  per year, 22.72%of people earning $15,000 to $24,999  and 72.7% of people earning $50,000 to $74,999.
 
-
-#Logistic Regression
+### Logistic Regression
 ```{r warning=FALSE, message=FALSE}
 predictors<- 
   model.matrix(maxPerc~., data = train) 
@@ -288,8 +299,9 @@ plot(fit)
 mean(fit$cvlo)
 mean(fit$cvup)
 ```
+Designed a model matrix according to maximum percentage of income. Decrease the variance, plot the k-fold cross-validation, calculated the upper and lower bound of probability of ‘max’.
 
-## Decision Trees
+### Decision Trees
 ```{r}
 rpart(max ~ `$50,000 to $74,999`, data = train)
 ```
@@ -328,10 +340,12 @@ remove(train_tree2)
 ```{r}
 sum(diag(confusion)) / nrow(train) * 100
 ```
+Used the rpart function set up the regression tree model for variable ‘max’ 
+After that we split the data according to the first split in the regression tree which is at 17.85 and plot max versus income and find out data point are mostly concentrated in region ‘$50,000 to $74,999’ Then, we use the whole model of max which includes other range of income and build a complete regression tree. Finally, we plot the complete decision tree model and find the accuracy of the model.
 
-#Unsupervised learning
+##Unsupervised learning
 
-##Hierarchical clustering
+###Hierarchical clustering
 ```{r}
 unsuperSet<-
   insurance_income
@@ -360,9 +374,12 @@ set_diffs %>%
   as.phylo() %>%
   plot(cex=0.9, label.offset = 1)
 ```
-A dendrogram constructed by hierarchical clustering from year-to-year distance data.
+figure. A dendrogram constructed by hierarchical clustering from year-to-year distance data.
 
-##K-means
+We start by filtering rows from 2000 to 2015. Next we used dist function to plot the dendrogram that show the average linkage of each variable. We plot the dendogram information at the end, representing year-to-year data.
+
+### K-means
+We set 8 as the number of clusters and plot categoried income percentage versus year and grouped them according to the 8 clusters. Then, we change the variable to estimate versus year and plot it out again
 ```{r}
 supSet<-
   insurance_income
@@ -413,8 +430,10 @@ supSet %>%
   geom_point(aes(color = cluster), alpha = 0.5)+
   scale_x_continuous(breaks = income$Year)
 ```
+Years that are similar tends to be grouped together, for example 2008 and 2009, 2002 and 2000. K-maens shows us the income in categories percentage per year has an increasing trend. Estimate of every year has a consistent pattern with slightly variation of the cluster, with group 4 has the lowest estimate and group 1 has the highest.
 
-#User-defined simulation(Bootstrapping)
+
+##User-defined simulation(Bootstrapping)
 For the user-defined simulation. I defined a function called hein() to bootstrap data: Health.services, Medical products appliances and equipment, Third.fifth(Median Income), Highest.fifth(Income), Lowest.fifth(Income) from origin dataset, then calculate the percentage that health cost (which is the combination of the cost of Health.services+Medical productsappliances and equipment) over each level of income and organize all output into a table. Then I perform simulation 5000 times to make sure the randomness and accurancy of our simulation data.
 
 ```{r}
@@ -472,5 +491,11 @@ ggplot(data=percent_sim, aes(x=percent_med, color="median income"))+
 ```
 This graph shows the percent range on health expenditures among different level of income. According to above website, the afforable level of health expenditures should around 9.6% of total income. However, many median income and low income percent have already exceed the afforable line.
 
+##Overall Conclusion:
+Upon college students take their first job, they are often surprised by the health care costs that take up a huge part of their paycheck.
+As insurance is not a neglectable aspect of our spending, in this project we discussed the percent of insurance of net income, and further analyze what is the reasonable range of insurance that everyone can afford.
+After all the analysis, we found out that insurance is becoming unaffordable to many people, especially for low-income family.
+However,we did not take policy and overall economy status into account, for example, ACA and some companies will provide insurance to their employees.
+Conclusion: Making the insurance pool larger will make it more affordable. However, more people have to pay for insurance too so we should find an optimum point.
 
 
